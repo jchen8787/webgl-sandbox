@@ -43,21 +43,45 @@ function main() {
     )
     const colorUniformLocation = gl.getUniformLocation(program, 'u_color')
 
-    // render
-    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height)
-    gl.clearColor(0, 0, 0, 0)
-    gl.clear(gl.COLOR_BUFFER_BIT)
-
-    gl.useProgram(program)
-
-    gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height)
-
     const positionBuffer = gl.createBuffer()
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer)
     gl.enableVertexAttribArray(positionAttributeLocation)
     gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0)
 
-    // draw 10 random rectangles
+    // render
+    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height)
+    gl.clearColor(0, 0, 0, 0)
+
+    gl.useProgram(program)
+    gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height)
+
+    setInterval(() => drawScene(gl, colorUniformLocation), 1000)
+}
+
+function createShader(gl, type, source) {
+    const shader = gl.createShader(type)
+    gl.shaderSource(shader, source)
+    gl.compileShader(shader)
+
+    return shader
+}
+
+function createProgram(gl, vertexShader, fragmentShader) {
+    const program = gl.createProgram()
+    gl.attachShader(program, vertexShader)
+    gl.attachShader(program, fragmentShader)
+    gl.linkProgram(program)
+
+    return program
+}
+
+function randomInt(range) {
+    return Math.floor(Math.random() * range)
+}
+
+function drawScene(gl, colorUniformLocation) {
+    gl.clear(gl.COLOR_BUFFER_BIT)
+
     for (let i = 0; i < 10; i++) {
         const x1 = randomInt(150)
         const y1 = randomInt(100)
@@ -83,25 +107,4 @@ function main() {
         )
         gl.drawArrays(gl.TRIANGLES, 0, 6)
     }
-}
-
-function createShader(gl, type, source) {
-    const shader = gl.createShader(type)
-    gl.shaderSource(shader, source)
-    gl.compileShader(shader)
-
-    return shader
-}
-
-function createProgram(gl, vertexShader, fragmentShader) {
-    const program = gl.createProgram()
-    gl.attachShader(program, vertexShader)
-    gl.attachShader(program, fragmentShader)
-    gl.linkProgram(program)
-
-    return program
-}
-
-function randomInt(range) {
-    return Math.floor(Math.random() * range)
 }
