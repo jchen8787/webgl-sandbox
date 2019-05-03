@@ -8,13 +8,14 @@ function main() {
         attribute vec2 a_position;
 
         uniform vec2 u_resolution;
+        uniform vec2 u_offset;
 
         void main() {
             vec2 zeroToOne = a_position / u_resolution;
             vec2 zeroToTwo = zeroToOne * 2.0;
             vec2 clipSpace = zeroToTwo - 1.0;
 
-            gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
+            gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1) + vec4(u_offset, 0, 0);
         }
     `
 
@@ -41,29 +42,36 @@ function main() {
     gl.attachShader(program, fragmentShader)
     gl.linkProgram(program)
 
-    const positionAttributeLocation = gl.getAttribLocation(
-        program,
-        'a_position',
-    )
-
-    const resolutionUniformLocation = gl.getUniformLocation(
-        program,
-        'u_resolution',
-    )
-    const colorUniformLocation = gl.getUniformLocation(program, 'u_color')
-
-    const positionBuffer = gl.createBuffer()
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer)
-    gl.enableVertexAttribArray(positionAttributeLocation)
-    gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0)
-
     // render
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height)
     gl.clearColor(0, 0, 0, 0)
 
     gl.useProgram(program)
+
+    const resolutionUniformLocation = gl.getUniformLocation(
+        program,
+        'u_resolution',
+    )
     gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height)
 
+    const offsetUniformLocation = gl.getUniformLocation(
+        program,
+        'u_offset',
+    )
+    gl.uniform2fv(offsetUniformLocation, [0.25, -0.25])
+
+    const positionAttributeLocation = gl.getAttribLocation(
+        program,
+        'a_position',
+    )
+
+    const positionBuffer = gl.createBuffer()
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer)
+
+    gl.enableVertexAttribArray(positionAttributeLocation)
+    gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0)
+
+    const colorUniformLocation = gl.getUniformLocation(program, 'u_color')
     setInterval(() => drawScene(gl, colorUniformLocation), 1000)
 }
 
@@ -93,6 +101,7 @@ function drawScene(gl, colorUniformLocation) {
             Math.random(),
             1,
         )
+
         gl.drawArrays(gl.TRIANGLES, 0, 6)
     }
 }
