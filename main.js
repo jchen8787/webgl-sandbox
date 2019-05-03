@@ -91,11 +91,11 @@ function drawScene(
 
     for (let i = 0; i < 10; i++) {
         // set position attribute data
-        const x1 = randomInt(200)
-        const y1 = randomInt(200)
+        const x1 = randomInt(400)
+        const y1 = randomInt(300)
 
-        const width = randomInt(200)
-        const height = randomInt(200)
+        const width = randomInt(400)
+        const height = randomInt(300)
 
         const x2 = x1 + width
         const y2 = y1 + height
