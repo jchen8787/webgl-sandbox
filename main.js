@@ -1,4 +1,4 @@
-main()
+window.onload = main
 
 function main() {
     const canvas = document.querySelector('#webgl-canvas')
@@ -28,9 +28,18 @@ function main() {
         }
     `
 
-    const vertexShader = createShader(gl, gl.VERTEX_SHADER, vsSource)
-    const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fsSource)
-    const program = createProgram(gl, vertexShader, fragmentShader)
+    const vertexShader = gl.createShader(gl.VERTEX_SHADER)
+    gl.shaderSource(vertexShader, vsSource)
+    gl.compileShader(vertexShader)
+
+    const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER)
+    gl.shaderSource(fragmentShader, fsSource)
+    gl.compileShader(fragmentShader)
+
+    const program = gl.createProgram()
+    gl.attachShader(program, vertexShader)
+    gl.attachShader(program, fragmentShader)
+    gl.linkProgram(program)
 
     const positionAttributeLocation = gl.getAttribLocation(
         program,
@@ -56,27 +65,6 @@ function main() {
     gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height)
 
     setInterval(() => drawScene(gl, colorUniformLocation), 1000)
-}
-
-function createShader(gl, type, source) {
-    const shader = gl.createShader(type)
-    gl.shaderSource(shader, source)
-    gl.compileShader(shader)
-
-    return shader
-}
-
-function createProgram(gl, vertexShader, fragmentShader) {
-    const program = gl.createProgram()
-    gl.attachShader(program, vertexShader)
-    gl.attachShader(program, fragmentShader)
-    gl.linkProgram(program)
-
-    return program
-}
-
-function randomInt(range) {
-    return Math.floor(Math.random() * range)
 }
 
 function drawScene(gl, colorUniformLocation) {
@@ -107,4 +95,8 @@ function drawScene(gl, colorUniformLocation) {
         )
         gl.drawArrays(gl.TRIANGLES, 0, 6)
     }
+}
+
+function randomInt(range) {
+    return Math.floor(Math.random() * range)
 }
