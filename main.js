@@ -47,25 +47,22 @@ function main() {
     gl.attachShader(program, fragmentShader)
     gl.linkProgram(program)
 
-    // render
+    const resolutionLocation = gl.getUniformLocation(program, 'u_resolution')
+    const offsetLocation = gl.getUniformLocation(program, 'u_offset')
+
+    const positionBuffer = gl.createBuffer()
+    const positionLocation = gl.getAttribLocation(program, 'a_position')
+
+    const colorBuffer = gl.createBuffer()
+    const colorLocation = gl.getAttribLocation(program, 'a_color')
+
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height)
     gl.clearColor(0, 0, 0, 0)
-
     gl.useProgram(program)
 
-    // set uniform data
-    const resolutionLocation = gl.getUniformLocation(program, 'u_resolution')
+    // render
     gl.uniform2f(resolutionLocation, gl.canvas.width, gl.canvas.height)
-
-    const offsetLocation = gl.getUniformLocation(program, 'u_offset')
     gl.uniform2fv(offsetLocation, [0.0, 0.0])
-
-    // set up attribute buffers and locations
-    const positionBuffer = gl.createBuffer()
-    const colorBuffer = gl.createBuffer()
-
-    const positionLocation = gl.getAttribLocation(program, 'a_position')
-    const colorLocation = gl.getAttribLocation(program, 'a_color')
 
     setInterval(
         () =>
