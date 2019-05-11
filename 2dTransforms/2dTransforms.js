@@ -23,11 +23,12 @@ function main() {
     gl.linkProgram(program)
     gl.useProgram(program)
 
-    // get glsl locations
+    // get glsl variable locations
     const locations = {
         position: gl.getAttribLocation(program, 'a_position'),
         color: gl.getAttribLocation(program, 'a_color'),
         resolution: gl.getUniformLocation(program, 'u_resolution'),
+        translation: gl.getUniformLocation(program, 'u_translation'),
     }
 
     // create buffers
@@ -63,7 +64,7 @@ function main() {
         xSlider.querySelector('#xValue').textContent = value
 
         translation[0] = value
-        drawScene(gl, locations, buffers, translation)
+        drawScene(gl, locations, buffers, translation, dimensions)
     }
 
     const ySlider = document.querySelector('#y')
@@ -87,22 +88,20 @@ function main() {
         ySlider.querySelector('#yValue').textContent = value
 
         translation[1] = value
-        drawScene(gl, locations, buffers, translation)
+        drawScene(gl, locations, buffers, translation, dimensions)
     }
 
-    drawScene(gl, locations, buffers, translation)
-    console.log('test')
+    drawScene(gl, locations, buffers, translation, dimensions)
 }
 
-function drawScene(gl, locations, buffers, translation) {
-    const width = 300
-    const height = 200
+function drawScene(gl, locations, buffers, translation, dimensions) {
+    gl.uniform2fv(locations.translation, translation)
 
-    const x0 = translation[0]
-    const x1 = x0 + width
+    const x0 = 0
+    const x1 = dimensions[0]
 
-    const y0 = translation[1]
-    const y1 = translation[1] + height
+    const y0 = 0
+    const y1 = dimensions[1]
 
     gl.bindBuffer(gl.ARRAY_BUFFER, buffers.position)
     gl.bufferData(
@@ -159,11 +158,4 @@ function drawScene(gl, locations, buffers, translation) {
 
 function getRandomInt(max) {
     return Math.floor(Math.random() * max)
-}
-
-function updatePosition(index, translation) {
-    return function(ui) {
-        translation[index] = ui.value
-        drawScene()
-    }
 }
