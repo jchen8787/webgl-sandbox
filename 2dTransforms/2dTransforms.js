@@ -37,12 +37,18 @@ function main() {
         color: gl.createBuffer(),
     }
 
+    setGeometry(gl, buffers.position, 0, 0)
+    const numVertices = 18
+
+    // put position buffer data into program
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffers.position)
+    gl.enableVertexAttribArray(locations.position)
+    gl.vertexAttribPointer(locations.position, 2, gl.FLOAT, false, 0, 0)
+
     gl.uniform2f(locations.resolution, gl.canvas.width, gl.canvas.height)
 
     // setup sliders
     const translation = [0, 0]
-    const dimensions = [300, 200]
-
     const xSlider = document.querySelector('#x')
     // prettier-ignore
     xSlider.innerHTML = `
@@ -51,7 +57,7 @@ function main() {
             <input
                 type="range"
                 min="0"
-                max="${gl.canvas.width - dimensions[0]}"
+                max="${gl.canvas.width}"
                 value="0" />
             <span id="xValue">${translation[0]}</span>
         </div>
@@ -64,7 +70,7 @@ function main() {
         xSlider.querySelector('#xValue').textContent = value
 
         translation[0] = value
-        drawScene(gl, locations, buffers, translation, dimensions)
+        drawScene(gl, buffers, locations, translation, numVertices)
     }
 
     const ySlider = document.querySelector('#y')
@@ -75,7 +81,7 @@ function main() {
             <input
                 type="range"
                 min="0"
-                max="${gl.canvas.height - dimensions[1]}"
+                max="${gl.canvas.height}"
                 value="0" />
             <span id="yValue">${translation[1]}</span>
         </div>
@@ -88,72 +94,79 @@ function main() {
         ySlider.querySelector('#yValue').textContent = value
 
         translation[1] = value
-        drawScene(gl, locations, buffers, translation, dimensions)
+        drawScene(gl, buffers, locations, translation, numVertices)
     }
 
-    drawScene(gl, locations, buffers, translation, dimensions)
+    drawScene(gl, buffers, locations, translation, numVertices)
 }
 
-function drawScene(gl, locations, buffers, translation, dimensions) {
+function drawScene(gl, buffers, locations, translation, numVertices) {
     gl.uniform2fv(locations.translation, translation)
-
-    const x0 = 0
-    const x1 = dimensions[0]
-
-    const y0 = 0
-    const y1 = dimensions[1]
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffers.position)
-    gl.bufferData(
-        gl.ARRAY_BUFFER,
-        // prettier-ignore
-        new Float32Array([
-            x0, y0,
-            x1, y0,
-            x0, y1,
-            x1, y1,
-            x0, y1,
-            x1, y0,
-        ]),
-        gl.STATIC_DRAW,
-    )
 
     // load color buffer
     gl.bindBuffer(gl.ARRAY_BUFFER, buffers.color)
 
-    const v0Color = [Math.random(), Math.random(), Math.random(), 1]
-    const v1Color = [Math.random(), Math.random(), Math.random(), 1]
-    const v2Color = [Math.random(), Math.random(), Math.random(), 1]
-    const v3Color = [Math.random(), Math.random(), Math.random(), 1]
-    const v4Color = [Math.random(), Math.random(), Math.random(), 1]
-    const v5Color = [Math.random(), Math.random(), Math.random(), 1]
+    const vertexColors = []
+
+    for (let i = 0; i < numVertices; i++) {
+        vertexColors.push(Math.random())
+        vertexColors.push(Math.random())
+        vertexColors.push(Math.random())
+        vertexColors.push(1)
+    }
+
     gl.bufferData(
         gl.ARRAY_BUFFER,
-        // prettier-ignore
-        new Float32Array([
-            v0Color[0], v0Color[1], v0Color[2], v0Color[3],
-            v1Color[0], v1Color[1], v1Color[2], v1Color[3],
-            v2Color[0], v2Color[1], v2Color[2], v2Color[3],
-            v3Color[0], v3Color[1], v3Color[2], v3Color[3],
-            v4Color[0], v4Color[1], v4Color[2], v4Color[3],
-            v5Color[0], v5Color[1], v5Color[2], v5Color[3],
-        ]),
+        new Float32Array(vertexColors),
         gl.STATIC_DRAW,
     )
 
-    // put position buffer data into program
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffers.position)
-    gl.enableVertexAttribArray(locations.position)
-    gl.vertexAttribPointer(locations.position, 2, gl.FLOAT, false, 0, 0)
-
-    // put colorr buffer data into program
+    // put color buffer data into program
     gl.bindBuffer(gl.ARRAY_BUFFER, buffers.color)
     gl.enableVertexAttribArray(locations.color)
     gl.vertexAttribPointer(locations.color, 4, gl.FLOAT, false, 0, 0)
 
     // render
     gl.clear(gl.COLOR_BUFFER_BIT)
-    gl.drawArrays(gl.TRIANGLES, 0, 6)
+    gl.drawArrays(gl.TRIANGLES, 0, numVertices)
+}
+
+function setGeometry(gl, positionBuffer, x, y) {
+    const width = 200
+    const height = 300
+    const thickness = 50
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer)
+    gl.bufferData(
+        gl.ARRAY_BUFFER,
+        // prettier-ignore
+        new Float32Array([
+            // left column
+            x, y,
+            x + thickness, y,
+            x, y + height,
+            x + thickness, y + height,
+            x, y + height,
+            x + thickness, y,
+
+            // top rung
+            x + thickness, y,
+            x + thickness + width, y,
+            x + thickness, y + thickness,
+            x + thickness + width, y + thickness,
+            x + thickness, y + thickness,
+            x + thickness + width, y,
+
+            // middle rung
+            x + thickness, y + thickness * 2,
+            x + width, y + thickness * 2,
+            x + thickness, y + thickness * 3,
+            x + width, y + thickness * 3,
+            x + thickness, y + thickness * 3,
+            x + width, y + thickness * 2,
+        ]),
+        gl.STATIC_DRAW,
+    )
 }
 
 function getRandomInt(max) {
